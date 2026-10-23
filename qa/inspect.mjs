@@ -1,0 +1,11 @@
+import { chromium } from '@playwright/test';
+const browser=await chromium.launch({channel:'chrome',headless:true,args:['--disable-dev-shm-usage']});
+const page=await browser.newPage({viewport:{width:1440,height:1000},deviceScaleFactor:1});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:4173');
+await page.waitForSelector('canvas');await page.waitForTimeout(1000);
+await page.screenshot({path:'qa/desktop.png',fullPage:true});
+console.log(JSON.stringify({errors,size:await page.evaluate(()=>({w:innerWidth,h:innerHeight,scroll:document.documentElement.scrollHeight,canvas:document.querySelector('canvas').getBoundingClientRect().toJSON(),controls:document.querySelector('.battle-controls').getBoundingClientRect().toJSON()}))}));
+await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);await page.screenshot({path:'qa/mobile.png',fullPage:true});
+console.log('mobile',await page.evaluate(()=>({scrollW:document.documentElement.scrollWidth,viewW:innerWidth})));
+await browser.close();

@@ -1,0 +1,15 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+const root=resolve(import.meta.dirname,'..');
+let html=await readFile(join(root,'dist/index.html'),'utf8');
+const jsTag=html.match(/<script\b[^>]*src="([^"]+)"[^>]*><\/script>/);
+const cssTag=html.match(/<link\b[^>]*href="([^"]+\.css)"[^>]*>/);
+if(!jsTag||!cssTag)throw new Error('Expected a single Vite JS/CSS bundle.');
+const js=await readFile(join(root,'dist',jsTag[1]),'utf8');
+const css=await readFile(join(root,'dist',cssTag[1]),'utf8');
+if(/^import\s/m.test(js))throw new Error('Offline bundle cannot contain external module imports.');
+html=html.replace(jsTag[0],()=>`<script type="module">${js.replace(/<\/script/gi,'<\\/script')}</script>`).replace(cssTag[0],()=>`<style>${css}</style>`);
+await mkdir(join(root,'release'),{recursive:true});
+await writeFile(join(root,'release','余烬守望.html'),html,'utf8');
+await writeFile(join(root,'dist','emberwatch-offline.html'),html,'utf8');
+console.log('Offline game ready: release/余烬守望.html (double-click to play, no server or network required)');
