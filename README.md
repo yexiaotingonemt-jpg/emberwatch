@@ -73,3 +73,7 @@ TypeScript、Phaser 3 与 Vite。当前入口为 `src/main.ts`，弹珠规则、
 GitHub Pages 使用 `.github/workflows/pages.yml`，推送至 `codex/initial-release` 后自动安装锁定依赖、运行规则测试、构建并部署；拉取请求执行构建与测试。浏览器交互和离线验收脚本在本机执行。
 
 相对资源路径兼容 GitHub Pages 仓库子目录。构建同时生成 `release/弹珠防线.html` 与网站上的 `pinball-offline.html`，其中脚本、样式和素材均已内嵌，无需联网运行。
+
+## 2.0.1 修订
+
+致命落空后提示「再来一局」重新开局；仍有生命时保留空格补发提示。玩法与数值保持原样。`node qa/pinball-drain-regression.mjs` 可验证 1 点生命致命落空、2 点生命普通补发及重开。

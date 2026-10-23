@@ -75,11 +75,23 @@ test('pinball: moving paddle adds directional English without exceeding speed ca
   moving.movePaddle(Infinity);assert.ok(Number.isFinite(moving.paddleTarget));
 });
 
-test('pinball: missing paddle costs exactly one life and enables a fresh serve',()=>{
-  const m=combat(),hp=m.hp;ball(m,790,1024,100,620);m.update(step);
+for(const hp of [2,20])test(`pinball: missing paddle at ${hp} HP keeps the re-serve instruction usable`,()=>{
+  const m=combat();m.hp=hp;ball(m,790,1024,100,620);m.update(step);
   assert.equal(m.balls.length,0);assert.equal(m.hp,hp-1);assert.equal(m.drains,1);assert.equal(m.ballReady,true);
   m.update(.1);assert.equal(m.hp,hp-1);assert.equal(m.drains,1);
   assert.equal(m.launch(),true);assert.equal(m.launch(),false);assert.equal(m.balls.length,1);
+  assert.match(m.events.find(e=>e.type==='drain')?.text??'',/重新发射/);
+});
+
+test('pinball: fatal drain gives restart guidance, blocks re-serve and allows a new run',()=>{
+  const m=combat();m.hp=1;ball(m,790,1024,100,620);m.update(step);
+  assert.equal(m.hp,0);assert.equal(m.phase,'defeat');assert.equal(m.ballReady,false);
+  const message=m.events.find(e=>e.type==='drain')?.text??'';
+  assert.match(message,/再来一局.*重新开局/);assert.doesNotMatch(message,/重新发射|按空格/);
+  assert.equal(m.launch(),false);assert.equal(m.balls.length,0);
+  m.update(.1);assert.equal(m.events.filter(e=>e.type==='lose').length,1);
+  m.restart();assert.equal(m.hp,20);assert.equal(m.phase,'build');
+  assert.equal(m.launch(),true);assert.equal(m.phase,'wave');assert.equal(m.balls.length,1);
 });
 
 test('pinball: pause and pending perk freeze simulation and reject spending and serve',()=>{

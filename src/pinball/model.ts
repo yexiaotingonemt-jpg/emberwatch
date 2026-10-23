@@ -127,7 +127,7 @@ export class PinballModel {
       if(addTrail){b.trail.unshift({x:b.x,y:b.y});if(b.trail.length>16)b.trail.pop();}if(b.y>HEIGHT+25)b.life=0;
     }
     const hadBalls=this.balls.length>0;this.balls=this.balls.filter(b=>b.life>0&&b.y<=HEIGHT+25);
-    if(hadBalls&&!this.balls.length){this.hp=Math.max(0,this.hp-1);this.drains++;this.ballReady=true;this.combo=0;this.comboTimer=0;this.effect('drain',this.paddleX,955,.8,{text:'弹珠落空 · 核心 -1',color:0xff7e83});this.emit('drain','按空格或点击战场重新发射 · 落空仅扣 1 点生命');this.shake=5;}
+    if(hadBalls&&!this.balls.length){this.hp=Math.max(0,this.hp-1);this.drains++;this.ballReady=true;this.combo=0;this.comboTimer=0;this.effect('drain',this.paddleX,955,.8,{text:'弹珠落空 · 核心 -1',color:0xff7e83});this.emit('drain',this.hp>0?'按空格或点击战场重新发射 · 落空仅扣 1 点生命':'核心已失守 · 点击「再来一局」重新开局');this.shake=5;}
     this.enemies=this.enemies.filter(e=>e.hp>0);this.waveRemaining=this.queue.length+this.enemies.length;
     if(this.hp<=0){this.phase='defeat';this.balls=[];this.ballReady=false;this.bestScore=Math.max(this.bestScore,this.score);this.emit('lose');return;}
     if(!this.queue.length&&!this.enemies.length){this.balls=[];this.ballReady=false;this.combo=0;this.comboTimer=0;this.gold+=45+this.wave*6;this.score+=500+this.hp*15;if(this.wave>=this.maxWaves){this.phase='victory';this.score+=this.hp*300+this.gold;this.bestScore=Math.max(this.bestScore,this.score);this.emit('win');}else{this.phase='build';this.emit('clear',`第 ${this.wave} 波守住了 · 获得 ${45+this.wave*6} 能量币`);if(this.wave%3===0){const available=Object.keys(PERKS).filter(id=>!this.perks.includes(id));for(let i=available.length-1;i>0;i--){const j=Math.floor(this.random()*(i+1));[available[i],available[j]]=[available[j],available[i]];}this.perkChoices=available.slice(0,3);}}}
